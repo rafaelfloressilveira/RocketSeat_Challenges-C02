@@ -1,4 +1,4 @@
-import { Children, createContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useState, useContext } from "react";
 import { api } from "./services/api";
 
 interface GenreResponseProps {
@@ -7,20 +7,33 @@ interface GenreResponseProps {
     title: string;
   }
 
+interface MoviesProviderProps {
+    children: ReactNode
+}
+
 interface MovieProps {
     imdbID: string;
     Title: string;
     Poster: string;
     Ratings: Array<{
-      Source: string;
-      Value: string;
+    Source: string;
+    Value: string;
     }>;
     Runtime: string;
   }
 
-const MoviesContext = createContext({})
+interface MoviesContextData{
+    genres: GenreResponseProps[];
+    selectedGenreId: number;
+    selectedGenre: GenreResponseProps;
+    handleClickButton: (id: number) => void;
+    movies: MovieProps[]
 
-export function MoviesProvider({children}) {
+}
+
+const MoviesContext = createContext<MoviesContextData>({} as MoviesContextData)
+
+export function MoviesProvider({children}: MoviesProviderProps) {
     const [selectedGenreId, setSelectedGenreId] = useState(1);
 
   const [genres, setGenres] = useState<GenreResponseProps[]>([]);
@@ -49,8 +62,13 @@ export function MoviesProvider({children}) {
   }
 
   return(
-      <MoviesContext.Provider value={{}}>
+      <MoviesContext.Provider value={{genres, selectedGenreId, selectedGenre, handleClickButton, movies}}>
           {children}
       </MoviesContext.Provider>
   )
+}
+
+export function useMovies() {
+    const context = useContext(MoviesContext);
+        return context
 }
